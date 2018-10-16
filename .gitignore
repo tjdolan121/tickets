@@ -8,4 +8,5 @@ venv/
 
 *.sqlite3
 
-.idea/
+.idea/workspace.xml
+
