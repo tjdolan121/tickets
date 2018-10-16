@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {{ board.name }} - {{ block.super }}
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Ticketing Boards</a></li>
+  <li class="breadcrumb-item active">{{ board.name }}</li>
+{% endblock %}
+
+{% block content %}
+  <div class="mb-4">
+    <a href="{% url 'new_ticket' board.pk %}" class="btn btn-primary">Create a New Ticket</a>
+  </div>
+
+  <table class="table">
+    <thead class="thead-inverse">
+      <tr>
+        <th>Ticket</th>
+        <th>Starter</th>
+        <th>Replies</th>
+        <th>Views</th>
+        <th>Last Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in tickets %}
+        <tr>
+          <td><a href="{% url 'ticket_posts' board.pk ticket.pk %}">{{ ticket.subject }}</a></td>
+          <td>{{ ticket.starter.username }}</td>
+          <td>{{ ticket.replies }}</td>
+          <td>{{ ticket.views }}</td>
+          <td>{{ ticket.last_updated }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
