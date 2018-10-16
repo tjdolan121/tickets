@@ -1,29 +1,60 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, ListView
 from django.utils import timezone
 from django.db.models import Count
 from .forms import NewTicketForm, PostForm
 from .models import Board, Ticket, Post
 
 
-def home(request):
-    boards = Board.objects.all()
-    return render(request, 'home.html', {'boards': boards})
+class BoardListView(ListView):
+    model = Board
+    context_object_name = 'boards'
+    template_name = 'home.html'
 
 
-def board_tickets(request, pk):
-    board = get_object_or_404(Board, pk=pk)
-    tickets = board.tickets.order_by('-last_updated').annotate(replies=Count('posts') - 1)
-    return render(request, 'tickets.html', {'board': board, 'tickets': tickets})
+class TicketListView(ListView):
+    model = Ticket
+    context_object_name = 'tickets'
+    template_name = 'tickets.html'
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        kwargs['board'] = self.board
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        self.board = get_object_or_404(Board, pk=self.kwargs.get('pk'))
+        queryset = self.board.tickets.order_by('-last_updated').annotate(replies=Count('posts') - 1)
+        return queryset
+
+
+class PostListView(ListView):
+    model = Post
+    context_object_name = 'posts'
+    template_name = 'ticket_posts.html'
+    paginate_by = 4
+
+    def get_context_data(self, **kwargs):
+        self.ticket.views += 1
+        self.ticket.save()
+        kwargs['ticket'] = self.ticket
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        self.ticket = get_object_or_404(Ticket, board__pk=self.kwargs.get('pk'), pk=self.kwargs.get('ticket_pk'))
+        queryset = self.ticket.posts.order_by('created_at')
+        return queryset
+
 
 
 @login_required
 def new_ticket(request, pk):
     board = get_object_or_404(Board, pk=pk)
-    #user = User.objects.first()
+    # user = User.objects.first()
     if request.method == 'POST':
         form = NewTicketForm(request.POST)
         if form.is_valid():

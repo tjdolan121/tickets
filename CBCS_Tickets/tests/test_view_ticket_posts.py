@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import resolve, reverse
 
 from ..models import Board, Post, Ticket
-from ..views import ticket_posts
+from ..views import PostListView
 
 
 class TicketPostsTests(TestCase):
@@ -20,4 +20,4 @@ class TicketPostsTests(TestCase):
 
     def test_view_function(self):
         view = resolve('/boards/1/tickets/1/')
-        self.assertEquals(view.func, ticket_posts)
+        self.assertEquals(view.func.view_class, PostListView)

@@ -1,6 +1,6 @@
 from django.urls import reverse, resolve
 from django.test import TestCase
-from ..views import board_tickets
+from ..views import TicketListView
 from ..models import Board
 
 
@@ -20,7 +20,7 @@ class BoardTicketsTests(TestCase):
 
     def test_board_tickets_url_resolves_board_tickets_view(self):
         view = resolve('/boards/1/')
-        self.assertEquals(view.func, board_tickets)
+        self.assertEquals(view.func.view_class, TicketListView)
 
     def test_board_tickets_view_contains_link_back_to_homepage(self):
         board_tickets_url = reverse('board_tickets', kwargs={'pk': 1})
