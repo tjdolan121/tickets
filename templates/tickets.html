@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load humanize %}
+
 {% block title %}
   {{ board.name }} - {{ block.super }}
 {% endblock %}
@@ -26,12 +28,26 @@
     </thead>
     <tbody>
       {% for ticket in tickets %}
+        {% url 'ticket_posts' board.pk ticket.pk as ticket_url %}
         <tr>
-          <td><a href="{% url 'ticket_posts' board.pk ticket.pk %}">{{ ticket.subject }}</a></td>
-          <td>{{ ticket.starter.username }}</td>
-          <td>{{ ticket.replies }}</td>
-          <td>{{ ticket.views }}</td>
-          <td>{{ ticket.last_updated }}</td>
+          <td>
+            <p class="mb-0">
+              <a href="{{ ticket_url }}">{{ ticket.subject }}</a>
+            </p>
+            <small class="text-muted">
+              Pages:
+              {% for i in ticket.get_page_range %}
+                <a href="{{ ticket_url }}?page={{ i }}">{{ i }}</a>
+              {% endfor %}
+              {% if ticket.has_many_pages %}
+              ... <a href="{{ ticket_url }}?page={{ ticket.get_page_count }}">Last Page</a>
+              {% endif %}
+            </small>
+          </td>
+          <td class="align-middle">{{ ticket.starter.username }}</td>
+          <td class="align-middle">{{ ticket.replies }}</td>
+          <td class="align-middle">{{ ticket.views }}</td>
+          <td class="align-middle">{{ ticket.last_updated|naturaltime }}</td>
         </tr>
       {% endfor %}
     </tbody>

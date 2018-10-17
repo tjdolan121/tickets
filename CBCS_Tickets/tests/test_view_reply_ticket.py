@@ -16,6 +16,12 @@ class ReplyTicketTestCase(TestCase):
         self.url = reverse('reply_ticket', kwargs={'pk': self.board.pk, 'ticket_pk': self.ticket.pk})
 
 
+# class SuccessfulReplyTicketTests(ReplyTicketTestCase):
+#     def test_redirection(self):
+#         url = reverse('ticket_posts', kwargs={'pk': self.board.pk, 'ticket_pk': self.ticket.pk})
+#         ticket_posts_url = '{url}?page=1#2'.format(url=url)
+#         self.assertRedirects(self.response, ticket_posts_url)
+
 # class LoginRequiredReplyTicketTests(ReplyTicketTestCase):
 #
 #

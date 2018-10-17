@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.generic import UpdateView, ListView
 from django.utils import timezone
 from django.db.models import Count
@@ -36,11 +36,15 @@ class PostListView(ListView):
     model = Post
     context_object_name = 'posts'
     template_name = 'ticket_posts.html'
-    paginate_by = 4
+    paginate_by = 20
 
     def get_context_data(self, **kwargs):
-        self.ticket.views += 1
-        self.ticket.save()
+        session_key = 'viewed_ticket_{}'.format(self.ticket.pk)
+        if not self.request.session.get(session_key, False):
+            self.ticket.views += 1
+            self.ticket.save()
+            self.request.session[session_key] = True
+
         kwargs['ticket'] = self.ticket
         return super().get_context_data(**kwargs)
 
@@ -92,7 +96,17 @@ def reply_ticket(request, pk, ticket_pk):
             post.ticket = ticket
             post.created_by = request.user
             post.save()
-            return redirect('ticket_posts', pk=pk, ticket_pk=ticket_pk)
+
+            ticket.last_updated = timezone.now()
+            ticket.save()
+
+            ticket_url = reverse('ticket_posts', kwargs={'pk': pk, 'ticket_pk': ticket_pk})
+            ticket_post_url = '{url}?page={page}#{id}'.format(
+                url=ticket_url,
+                id=post.pk,
+                page=ticket.get_page_count()
+            )
+            return redirect(ticket_post_url)
     else:
         form = PostForm()
     return render(request, 'reply_ticket.html', {'ticket': ticket, 'form': form})
