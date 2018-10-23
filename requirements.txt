@@ -6,4 +6,5 @@ python-decouple==3.1
 psycopg2==2.7.5
 gunicorn==19.9.0
 django-heroku==0.3.1
+whitenoise==4.1
 
