@@ -54,7 +54,6 @@ class PostListView(ListView):
         return queryset
 
 
-
 @login_required
 def new_ticket(request, pk):
     board = get_object_or_404(Board, pk=pk)
